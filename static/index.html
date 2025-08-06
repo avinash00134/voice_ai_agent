@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Agent - Advanced Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .voice-panel, .text-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .voice-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .record-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .record-button.recording {
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            animation: pulse 1.5s infinite;
+        }
+
+        .record-button.recording::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            border-radius: 50%;
+            z-index: -1;
+            animation: ripple 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .voice-status {
+            text-align: center;
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .text-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .text-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .send-button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 15px;
+            word-wrap: break-word;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .agent-message {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .actions-list {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .action-item {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 0.2rem 0.2rem 0 0;
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.75rem;
+            text-align: center;
+            color: white;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .status-bar.recording {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            animation: glow 1.5s infinite alternate;
+        }
+
+        .status-bar.processing {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+        }
+
+        .status-bar.error {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(0, 184, 148, 0.3); }
+            to { box-shadow: 0 0 20px rgba(0, 184, 148, 0.6); }
+        }
+
+        .controls-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .volume-control, .settings-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+        }
+
+        .volume-slider {
+            width: 100px;
+        }
+
+        .settings-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .settings-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .visualizer {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 0 1rem;
+        }
+
+        .visualizer-bar {
+            width: 3px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .visualizer.active .visualizer-bar {
+            animation: visualize 0.5s infinite alternate;
+        }
+
+        @keyframes visualize {
+            to { height: 30px; background: #4facfe; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .app-container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🎤 Voice AI Agent</h1>
+            <div class="subtitle">Advanced AI-Powered Voice Assistant</div>
+        </div>
+
+        <div class="status-bar" id="statusBar" style="display: none;">
+            Ready to assist you
+        </div>
+
+        <div class="main-content">
+            <div class="voice-panel">
+                <div class="panel-title">
+                    🎙️ Voice Control
+                </div>
+                <div class="voice-controls">
+                    <button class="record-button" id="recordButton">
+                        🎤
+                    </button>
+                    <div class="voice-status" id="voiceStatus">
+                        Click to start recording
+                    </div>
+                    <div class="visualizer" id="visualizer">
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-panel">
+                <div class="panel-title">
+                    💬 Text Input
+                </div>
+                <div class="text-input-container">
+                    <input type="text" class="text-input" id="textInput" 
+                           placeholder="Type your message here...">
+                    <button class="send-button" id="sendButton">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message agent-message">
+                Welcome! I'm your Voice AI Agent. You can speak to me or type your requests. I can help you with tasks like opening applications, writing files, and much more!
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="volume-control">
+                <span>🔊</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+            </div>
+            <div class="settings-control">
+                <button class="settings-button" id="settingsButton">⚙️ Settings</button>
+                <button class="settings-button" id="clearButton">🗑️ Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AdvancedVoiceAI {
+            constructor() {
+                this.websocket = null;
+                this.sessionId = 'session_' + Date.now();
+                this.isRecording = false;
+                this.isConnected = false;
+                this.audioContext = null;
+                
+                this.initWebSocket();
+                this.initEventListeners();
+                this.initAudioContext();
+            }
+
+            initWebSocket() {
+                const wsUrl = `ws://${window.location.host}/ws/${this.sessionId}`;
+                this.websocket = new WebSocket(wsUrl);
+                
+                this.websocket.onopen = () => {
+                    this.isConnected = true;
+                    this.showStatus('Connected to Voice AI Agent', 'success');
+                    setTimeout(() => this.hideStatus(), 2000);
+                };
+                
+                this.websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.handleWebSocketMessage(data);
+                };
+                
+                this.websocket.onclose = () => {
+                    this.isConnected = false;
+                    this.showStatus('Disconnected from server', 'error');
+                };
+
+                this.websocket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    this.showStatus('Connection error', 'error');
+                };
+            }
+
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Audio context not available:', e);
+                }
+            }
+
+            initEventListeners() {
+                const recordButton = document.getElementById('recordButton');
+                const sendButton = document.getElementById('sendButton');
+                const textInput = document.getElementById('textInput');
+                const clearButton = document.getElementById('clearButton');
+                const settingsButton = document.getElementById('settingsButton');
+
+                recordButton.addEventListener('click', () => this.toggleRecording());
+                sendButton.addEventListener('click', () => this.sendTextMessage());
+                clearButton.addEventListener('click', () => this.clearChat());
+                
+                textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendTextMessage();
+                    }
+                });
+
+                // Volume control
+                const volumeSlider = document.getElementById('volumeSlider');
+                volumeSlider.addEventListener('input', (e) => {
+                    this.setVolume(e.target.value / 100);
+                });
+
+                // Settings button (placeholder)
+                settingsButton.addEventListener('click', () => {
+                    alert('Settings panel coming soon!');
+                });
+            }
+
+            toggleRecording() {
+                if (!this.isConnected) {
+                    this.showStatus('Not connected to server', 'error');
+                    return;
+                }
+
+                if (this.isRecording) {
+                    this.stopRecording();
+                } else {
+                    this.startRecording();
+                }
+            }
+
+            startRecording() {
+                if (this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify({command: 'start_recording'}));
+                    this.isRecording = true;
+                    this.updateRecordingUI();
+                    this.showStatus('🎤 Listening... Speak now!', 'recording');
+                    
+                    // Start visualizer animation
+                    document.getElementById('visualizer').classList.add('active');
+                }
+            }
+
+            stopRecording() {
+                if (this.websocket.readyState === WebSocket.OPEN) {
+                    this.websocket.send(JSON.stringify({command: 'stop_recording'}));
+                    this.isRecording = false;
+                    this.updateRecordingUI();
+                    this.showStatus('🤔 Processing your voice...', 'processing');
+                    
+                    // Stop visualizer animation
+                    document.getElementById('visualizer').classList.remove('active');
+                }
+            }
+
+            sendTextMessage() {
+                const textInput = document.getElementById('textInput');
+                const text = textInput.value.trim();
+                
+                if (!text) return;
+                
+                if (!this.isConnected) {
+                    this.showStatus('Not connected to server', 'error');
+                    return;
+                }
+
+                if (this.websocket.readyState === WebSocket.OPEN) {
+                    this.addMessage(text, 'user');
+                    this.websocket.send(JSON.stringify({
+                        command: 'text_input',
+                        text: text
+                    }));
+                    textInput.value = '';
+                    this.showStatus('🤔 Processing...', 'processing');
+                }
+            }
+
+            handleWebSocketMessage(data) {
+                if (data.status === 'recording_started') {
+                    this.showStatus('🎤 Recording started', 'recording');
+                } else if (data.type === 'voice_result' || data.type === 'text_result') {
+                    this.handleAIResponse(data.data);
+                }
+            }
+
+            handleAIResponse(responseData) {
+                if (responseData.error) {
+                    this.showStatus(`❌ Error: ${responseData.error}`, 'error');
+                    return;
+                }
+
+                // Show transcription if from voice
+                if (responseData.transcription) {
+                    this.addMessage(responseData.transcription, 'user');
+                }
+
+                // Show AI response
+                this.addMessage(responseData.response, 'agent', responseData.actions_taken);
+
+                // Play audio if available (placeholder)
+                if (responseData.audio_file) {
+                    this.playAudioResponse(responseData.audio_file);
+                }
+
+                this.hideStatus();
+            }
+
+            addMessage(text, sender, actions = []) {
+                const chatContainer = document.getElementById('chatContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                const textDiv = document.createElement('div');
+                textDiv.textContent = text;
+                messageDiv.appendChild(textDiv);
+
+                // Add actions if present
+                if (actions && actions.length > 0) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'actions-list';
+                    
+                    const actionsTitle = document.createElement('div');
+                    actionsTitle.textContent = '⚡ Actions taken:';
+                    actionsTitle.style.fontWeight = 'bold';
+                    actionsTitle.style.marginBottom = '0.3rem';
+                    actionsDiv.appendChild(actionsTitle);
+                    
+                    actions.forEach(action => {
+                        const actionDiv = document.createElement('span');
+                        actionDiv.className = 'action-item';
+                        actionDiv.textContent = action.replace('_', ' ');
+                        actionsDiv.appendChild(actionDiv);
+                    });
+                    
+                    messageDiv.appendChild(actionsDiv);
+                }
+
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                // Add animation delay for smooth appearance
+                setTimeout(() => {
+                    messageDiv.style.opacity = '1';
+                    messageDiv.style.transform = 'translateY(0)';
+                }, 50);
+            }
+
+            updateRecordingUI() {
+                const recordButton = document.getElementById('recordButton');
+                const voiceStatus = document.getElementById('voiceStatus');
+
+                if (this.isRecording) {
+                    recordButton.classList.add('recording');
+                    recordButton.textContent = '⏹';
+                    voiceStatus.textContent = 'Recording... Click to stop';
+                } else {
+                    recordButton.classList.remove('recording');
+                    recordButton.textContent = '🎤';
+                    voiceStatus.textContent = 'Click to start recording';
+                }
+            }
+
+            showStatus(message, type = '') {
+                const statusBar = document.getElementById('statusBar');
+                statusBar.textContent = message;
+                statusBar.className = `status-bar ${type}`;
+                statusBar.style.display = 'block';
+            }
+
+            hideStatus() {
+                const statusBar = document.getElementById('statusBar');
+                setTimeout(() => {
+                    statusBar.style.display = 'none';
+                }, 2000);
+            }
+
+            clearChat() {
+                const chatContainer = document.getElementById('chatContainer');
+                chatContainer.innerHTML = `
+                    <div class="message agent-message">
+                        Chat cleared! How can I help you today?
+                    </div>
+                `;
+            }
+
+            setVolume(volume) {
+                // Placeholder for volume control
+                console.log('Volume set to:', volume);
+            }
+
+            playAudioResponse(audioFile) {
+                // Placeholder for audio playback
+                console.log('Playing audio:', audioFile);
+                // In a full implementation, you would:
+                // 1. Fetch the audio file
+                // 2. Create an Audio element
+                // 3. Play the audio
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.voiceAI = new AdvancedVoiceAI();
+        });
+
+        // Add some visual effects
+        document.addEventListener('mousemove', (e) => {
+            const container = document.querySelector('.app-container');
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const xPercent = x / rect.width;
+            const yPercent = y / rect.height;
+            
+            // Subtle parallax effect
+            container.style.transform = `
+                perspective(1000px) 
+                rotateY(${(xPercent - 0.5) * 2}deg) 
+                rotateX(${(yPercent - 0.5) * -2}deg)
+            `;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            const container = document.querySelector('.app-container');
+            container.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg)';
+        });
+    </script>
+</body>
+</html>
